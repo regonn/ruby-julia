@@ -47,6 +47,19 @@ typedef struct {
 typedef struct {
     JL_DATA_TYPE
     jl_sym_t *name;
+    jl_value_t *lb;
+    jl_value_t *ub;
+} jl_tvar_t;
+
+typedef struct {
+    JL_DATA_TYPE
+    jl_tvar_t *var;
+    jl_value_t *body;
+} jl_unionall_t;
+
+typedef struct {
+    JL_DATA_TYPE
+    jl_sym_t *name;
     struct _jl_module_t *module;
     jl_svec_t *names;
     jl_value_t *wrapper;
@@ -97,8 +110,10 @@ struct julia_api_table {
   jl_datatype_t *jl_float16_type;
   jl_datatype_t *jl_float32_type;
   jl_datatype_t *jl_float64_type;
+  jl_datatype_t *jl_datatype_type;
+  jl_typename_t *jl_array_typename;
   jl_value_t * (* jl_eval_string)(const char *str);
-  jl_value_t * (* jl_typeof)(jl_value_t *v);
+  jl_datatype_t * (* jl_typeof)(jl_value_t *v);
   const char * (* jl_typeof_str)(jl_value_t *v);
   const char * (* jl_string_ptr)(jl_value_t *s);
   int8_t (* jl_unbox_bool)(jl_value_t *v);

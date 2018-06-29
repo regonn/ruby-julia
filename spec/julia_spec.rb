@@ -39,5 +39,9 @@ describe Julia do
 
     specify { expect_julia('Float32(0.5)').to eq(0.5) }
     specify { expect_julia('Float64(0.5)').to eq(0.5) }
+
+    # Array conversion
+
+    specify { expect_julia('vec([])').to eq([]) }
   end
 end

@@ -64,6 +64,8 @@ init_api_table(VALUE handle)
   INIT_API_TABLE_ENTRY(jl_float16_type);
   INIT_API_TABLE_ENTRY(jl_float32_type);
   INIT_API_TABLE_ENTRY(jl_float64_type);
+  INIT_API_TABLE_ENTRY(jl_datatype_type);
+  INIT_API_TABLE_ENTRY(jl_array_typename);
   INIT_API_TABLE_ENTRY(jl_eval_string);
   INIT_API_TABLE_ENTRY(jl_init);
   INIT_API_TABLE_ENTRY(jl_typeof);
@@ -84,7 +86,7 @@ init_api_table(VALUE handle)
 
 int
 jl_typeis(jl_value_t *v, jl_datatype_t *t){
-  return ((jl_typename_t *)JULIA_API(jl_typeof)(v) == t->name);
+  return (JULIA_API(jl_typeof)(v) == t->name);
 }
 
 int
@@ -171,6 +173,27 @@ jl_is_float64(jl_value_t *v)
   return jl_typeis(v, JULIA_API(jl_float64_type));
 }
 
+int
+jl_is_datatype(jl_value_t *v)
+{
+  return jl_typeis(v, JULIA_API(jl_datatype_type));
+}
+
+
+int
+jl_is_array_type(void *t)
+{
+  return (jl_is_datatype(t) &&
+          ((jl_datatype_t*)(t))->name == (JULIA_API(jl_array_typename))->name);
+}
+
+int
+jl_is_array(void *v)
+{
+  jl_value_t *t = JULIA_API(jl_typeof)(v);
+  return jl_is_array_type(t);
+}
+
 static VALUE
 jl_eval_string(VALUE handle, VALUE arg)
 {
@@ -189,7 +212,7 @@ jl_eval_string(VALUE handle, VALUE arg)
   }
   if (jl_is_int8(ans)) {
     return INT2NUM(JULIA_API(jl_unbox_int8)(ans));
- }
+  }
   if (jl_is_uint8(ans)) {
     return INT2NUM(JULIA_API(jl_unbox_uint8)(ans));
   }
@@ -216,6 +239,9 @@ jl_eval_string(VALUE handle, VALUE arg)
   }
   if (jl_is_float64(ans)) {
     return DBL2NUM(JULIA_API(jl_unbox_float64)(ans));
+  }
+  if (jl_is_array(ans)) {
+    return rb_ary_new2(0);
   }
   return rb_str_new2(JULIA_API(jl_typeof_str)(ans));
 }
